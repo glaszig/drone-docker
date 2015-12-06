@@ -1,0 +1,34 @@
+  ServerName <%= @params[:server_name] %>
+  <% unless @params[:server_aliases].empty? %>
+  ServerAlias <%= @params[:server_aliases] * ' ' %>
+  <% end -%>
+
+  ProxyPreserveHost On
+
+  <Location />
+    <% if node['apache']['version'] == '2.2' %>
+    Order Allow,Deny
+    Allow from all
+    <% else %>
+    Require all granted
+    <% end -%>
+    ProxyPass        <%= @params[:proxy_url] %>
+    ProxyPassReverse <%= @params[:proxy_url] %>
+    ProxyPass        <%= @params[:ws_proxy_url] %>
+  </Location>
+
+  # Enable/disable the handling of HTTP/1.1 "Via:" headers.
+  # ("Full" adds the server version; "Block" removes all outgoing Via: headers)
+  # Set to one of: Off | On | Full | Block
+
+  ProxyVia On
+
+  LogLevel info
+  LogFormat "0.0.0.0 %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+  LogFormat "0.0.0.0 %l %u %t \"%m http://%{Host}i%U %H\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" extended
+  LogFormat "0.0.0.0 %l %u %t \"%m https://%{Host}i%U %H\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" extended_ssl
+
+  ErrorLog <%= node['apache']['log_dir'] %>/<%= @params[:name] %>-error.log
+  # http://httpd.apache.org/docs/2.2/en/mod/mod_log_config.html#formats
+  CustomLog <%= node['apache']['log_dir'] %>/<%= @params[:name] %>-access.log extended env=!HTTPS
+  CustomLog <%= node['apache']['log_dir'] %>/<%= @params[:name] %>-access.log extended_ssl env=HTTPS

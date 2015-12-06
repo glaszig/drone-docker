@@ -1,0 +1,10 @@
+<VirtualHost *:443>
+<%= render 'apache_vhost.erb' %>
+
+  RequestHeader set X-Forwarded-Proto "https"
+
+  SSLEngine on
+  SSLCertificateFile    <%= node['drone-docker']['proxy']['ssl_certificate_file'] %>
+  SSLCertificateKeyFile <%= node['drone-docker']['proxy']['ssl_certificate_key_file'] %>
+  SetEnvIf User-Agent ".*MSIE.*" nokeepalive ssl-unclean-shutdown
+</VirtualHost>
