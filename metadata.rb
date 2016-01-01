@@ -6,5 +6,5 @@ description      'Sets up Drone CI'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version          '1.0.0'
 
-depends 'docker'
+depends 'docker', '~> 2.0'
 depends 'apache2', '~> 3.0.0'

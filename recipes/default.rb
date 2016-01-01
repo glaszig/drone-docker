@@ -1,8 +1,8 @@
-include_recipe 'docker'
-
-execute 'restart container' do
-  command 'docker restart drone'
-  action :nothing
+case node['platform']
+when 'debian', 'ubuntu'
+  include_recipe 'apt-docker'
+when 'redhat', 'centos', 'fedora'
+  include_recipe 'yum-docker'
 end
 
 begin
@@ -16,12 +16,22 @@ rescue => e
   Chef::Log.info "[drone-docker] No env data bag found (#{e.message})"
 end
 
-docker_container node['drone-docker']['image'] do
+docker_installation_package 'default' do
+  version node['docker']['version']
+  action :create
+end
+
+docker_image node['drone-docker']['image'] do
   tag node['drone-docker']['tag']
-  container_name node['drone-docker']['container_name']
-  port %w( 8000:8000 )
-  volume node['drone-docker']['volumes']
+  action :pull
+  notifies :redeploy, "docker_container[#{node['drone-docker']['container_name']}]"
+end
+
+docker_container node['drone-docker']['container_name'] do
+  repo node['drone-docker']['image']
+  tag node['drone-docker']['tag']
+  port node['drone-docker']['ports']
   env node['drone-docker']['env']
-  detach true
-  cmd_timeout node['drone-docker']['cmd_timeout']
+  binds node['drone-docker']['volumes']
+  restart_policy 'always'
 end
