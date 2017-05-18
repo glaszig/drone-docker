@@ -1,7 +1,7 @@
 drone-docker
 ============
 
-Installs Drone CI via Docker.
+Installs Drone CI (>= 0.6) via Docker.
 
 Requirements
 ------------

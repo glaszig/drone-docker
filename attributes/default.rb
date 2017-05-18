@@ -1,6 +1,7 @@
 default['drone-docker']['image'] = 'drone/drone'
-default['drone-docker']['tag'] = '0.4'
-default['drone-docker']['container_name'] = 'drone'
+default['drone-docker']['tag'] = '0.6'
+default['drone-docker']['container_name']['server'] = 'drone-server'
+default['drone-docker']['container_name']['agent'] = 'drone-agent'
 default['drone-docker']['ports'] = %w( 8000:8000 )
 default['drone-docker']['cmd_timeout'] = 120
 default['drone-docker']['volumes'] = [

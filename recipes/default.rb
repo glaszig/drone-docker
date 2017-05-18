@@ -27,7 +27,7 @@ docker_image node['drone-docker']['image'] do
   notifies :redeploy, "docker_container[#{node['drone-docker']['container_name']}]"
 end
 
-docker_container node['drone-docker']['container_name'] do
+docker_container node['drone-docker']['container_name']['server'] do
   repo node['drone-docker']['image']
   tag node['drone-docker']['tag']
   port node['drone-docker']['ports']
@@ -35,3 +35,16 @@ docker_container node['drone-docker']['container_name'] do
   binds node['drone-docker']['volumes']
   restart_policy 'always'
 end
+
+docker_container node['drone-docker']['container_name']['agent'] do
+  repo node['drone-docker']['image']
+  tag node['drone-docker']['tag']
+  command 'agent'
+  env [
+    "DRONE_SERVER=ws://#{node['drone-docker']['container_name']['server']}:8000/ws/broker",
+    node['drone-docker']['env'].detect { |env| env.start_with? 'DRONE_SECRET' }
+  ].flatten.compact
+  binds [ '/var/run/docker.sock:/var/run/docker.sock' ]
+  restart_policy 'always'
+end
+
